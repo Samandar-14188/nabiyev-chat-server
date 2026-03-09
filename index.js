@@ -10,15 +10,19 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: '*',
     methods: ['GET', 'POST']
   }
 })
 
-app.use(cors())
+// Middleware
+app.use(cors({ origin: '*' }))  // ← o'zgartirildi
 app.use(express.json())
 
+// Routes — hammasi bu yerda! ← to'g'ri joy
 app.use('/api/auth', require('./routes/auth'))
+app.use('/api/users', require('./routes/users'))
+app.use('/api/messages', require('./routes/messages'))
 
 app.get('/', (req, res) => {
   res.json({ message: 'Server ishlayapti! ✅' })
@@ -28,6 +32,7 @@ app.get('/', (req, res) => {
 const socketHandler = require('./socket/socketHandler')
 socketHandler(io)
 
+// MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('MongoDB ulandi ✅')
@@ -36,5 +41,3 @@ mongoose.connect(process.env.MONGODB_URI)
     })
   })
   .catch((err) => console.log('MongoDB xatolik:', err))
-  app.use('/api/users', require('./routes/users'))
-  app.use('/api/messages', require('./routes/messages'))
